@@ -23,10 +23,12 @@ function ButtonLayer:addMoveButton()
         if ccui.TouchEventType.began == type then
             self.role:setDirector("left")
             self.role:action("nvdi_walk")
+            self.role:movego()
             return true
         elseif ccui.TouchEventType.moved == type then
             return 
         else
+            self.role:unscheduleUpdate()
             self.role:action("nvdi_idle")
         end
     end
@@ -36,10 +38,12 @@ function ButtonLayer:addMoveButton()
         if ccui.TouchEventType.began == type then
             self.role:setDirector("right")
             self.role:action("nvdi_walk")
+            self.role:movego()
             return true
         elseif ccui.TouchEventType.moved == type then
             return 
         else
+            self.role:unscheduleUpdate()
             self.role:action("nvdi_idle")
         end
     end

@@ -9,14 +9,10 @@ function MainScene:onCreate()
     for i=1,#nvdi_animations do
         self:loadAnimation(nvdi_animations[i])
     end
-    
-    local role=require("app.Player.Role").new(false)
-    role:setPosition(display.cx,display.cy)
-    self:addChild(role)
-    role:action("nvdi_idle",-1)
 
-    local buttonLayer=require("app.Button.ButtonLayer").new(role)
-    self:addChild(buttonLayer)
+    local gameLayer=require("app.views.GameLayer").new()
+    self:addChild(gameLayer)
+    
 end
 
 function MainScene:loadAnimation(a)

@@ -1,32 +1,73 @@
-local animationCache=cc.AnimationCache:getInstance()
+ROLE_STATE=
+{
+    IDLE=1,
+    WALK=2,
+    ATTACK=3
+}
 
-local Role=class("role",function()
-    return cc.Node:create()
+ROLE_DIR=
+{
+    LEFT=1,
+    RIGHT=2
+}
+
+local Role=class("Role",function()
+    return cc.Sprite:create()
 end)
 
-function Role:ctor(dir)
-    self.direction=dir
-    self.state="idle"
-    self.role=cc.Sprite:createWithSpriteFrameName("nvdi_idle_01.png")
-    self.role:setFlippedX(self.direction)
-    self:addChild(self.role)
-
+function Role:ctor()
+    self._speed=2.5
+    self._direction=ROLE_DIR.RIGHT
+    self._state=ROLE_STATE.IDLE
+    self._idleAnimation=nil
+    self._walkAnimation=nil
+    self._attackAnimation=nil
+    self._bodyRect=nil
+    self._attackRect=nil
 end
 
-function Role:setDirector(dir)
-    if dir=="left" then
-        self.direction=true
+function Role:setDirection(direction)
+    if self._direction==direction then return end
+    if self._state ~=ROLE_STATE.IDLE or self._state ~= ROLE_STATE.WALK then return end
+
+    if direction==ROLE_DIR.RIGHT then
+        self:setScaleX(-1)
+        self._direction=direction
     else
-        self.direction=false
+        self:setScaleX(1)
+        self._direction=direction
     end
-    self.role:setFlippedX(self.direction)
 end
 
-function Role:action(str)
-    self.role:stopAllActions()
-    local animation=animationCache:getAnimation(str)
-    local animate=cc.Animate:create(animation)
-    self.role:runAction(animate)
+function Role:idle()
+    if self._state==ROLE_STATE.IDLE then return end
+
+    self:stopAllActions()
+    self:runAction(cc.Animate:create(self._idleAimation))
+    self._state=ROLE_STATE.IDLE
+
 end
+
+function Role:walk()
+    if self._state==ROLE_STATE.IDLE or self._state==ROLE_STATE.WALK then
+        self:stopAllActions()
+        self:runAction(cc.Animate:create(self._walkAnimation))
+        self._state=ROLE_STATE.WALK
+    end
+end
+
+function Role:attack()
+    if self._state==ROLE_STATE.IDLE or self._state==ROLE_STATE.WALK then
+        self.stopAllActions()
+        local spawn=cc.Spawn:create(cc.Animate:create(self._attackAnimation),cc.CallFunc:create(function()
+            self._state=ROLE_STATE.ATTACK
+        end))
+        local sequence=cc.Sequence:create(spawn,cc.CallFunc:create(function()
+            self._state=ROLE_STATE.IDLE
+        end))
+        self:runAction(sequence)
+    end
+end
+
 
 return Role
